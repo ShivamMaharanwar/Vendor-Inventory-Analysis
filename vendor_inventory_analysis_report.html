@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vendor Inventory Analysis System – Project Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy: #0B1F3A;
+    --navy-mid: #163355;
+    --blue: #1A73C8;
+    --blue-lt: #E8F2FF;
+    --accent: #E8630A;
+    --accent-lt: #FFF0E6;
+    --teal: #0D8A72;
+    --teal-lt: #E3F5F1;
+    --gold: #C9910A;
+    --gold-lt: #FEF8E7;
+    --red: #D0302F;
+    --red-lt: #FEE2E2;
+    --purple: #6D28D9;
+    --purple-lt: #EDE9FE;
+    --muted: #6B7280;
+    --border: #E5E9F2;
+    --bg: #F6F8FC;
+    --white: #FFFFFF;
+    --text: #111827;
+    --card-r: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+
+  /* ── HEADER ── */
+  .report-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 60px 60px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: rgba(26,115,200,0.18);
+  }
+  .report-header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 40%;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(232,99,10,0.12);
+  }
+  .badge { display: inline-block; background: rgba(26,115,200,0.25); color: #90C7FF; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 5px 14px; border-radius: 50px; margin-bottom: 20px; }
+  .report-header h1 { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 700; line-height: 1.2; margin-bottom: 14px; }
+  .report-header p { color: rgba(255,255,255,0.65); font-size: 15px; max-width: 600px; }
+  .stack-tags { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+  .stack-tag { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.85); font-size: 12px; padding: 5px 16px; border-radius: 50px; }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 48px 40px; }
+  .section { margin-bottom: 56px; }
+  .section-label { font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--blue); font-weight: 500; margin-bottom: 8px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--navy); margin-bottom: 20px; }
+  .section-desc { color: var(--muted); max-width: 700px; margin-bottom: 28px; line-height: 1.75; }
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+  /* ── KPI GRID ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .kpi-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--card-r); padding: 22px 20px; }
+  .kpi-card .kpi-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .kpi-card .kpi-value { font-size: 30px; font-weight: 500; color: var(--navy); }
+  .kpi-card .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .kpi-card.accent-blue { border-left: 4px solid var(--blue); }
+  .kpi-card.accent-orange { border-left: 4px solid var(--accent); }
+  .kpi-card.accent-teal { border-left: 4px solid var(--teal); }
+  .kpi-card.accent-gold { border-left: 4px solid var(--gold); }
+  .kpi-card.accent-red { border-left: 4px solid var(--red); }
+  .kpi-card.accent-purple { border-left: 4px solid var(--purple); }
+
+  /* ── CHART CARDS ── */
+  .chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  .chart-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  .chart-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--card-r); padding: 24px; }
+  .chart-card h3 { font-size: 14px; font-weight: 500; color: var(--navy); margin-bottom: 4px; }
+  .chart-card .chart-sub { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+  .chart-wrap { position: relative; width: 100%; }
+
+  /* ── LEGEND ── */
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; font-size: 12px; color: var(--muted); }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+  /* ── INSIGHT BOX ── */
+  .insight-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
+  .insight-box { border-radius: 10px; padding: 18px 20px; }
+  .insight-box.blue { background: var(--blue-lt); border-left: 3px solid var(--blue); }
+  .insight-box.orange { background: var(--accent-lt); border-left: 3px solid var(--accent); }
+  .insight-box.teal { background: var(--teal-lt); border-left: 3px solid var(--teal); }
+  .insight-box.gold { background: var(--gold-lt); border-left: 3px solid var(--gold); }
+  .insight-box.red { background: var(--red-lt); border-left: 3px solid var(--red); }
+  .insight-box.purple { background: var(--purple-lt); border-left: 3px solid var(--purple); }
+  .insight-box h4 { font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 5px; }
+  .insight-box p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* ── PIPELINE ── */
+  .pipeline { display: flex; align-items: stretch; gap: 0; margin: 28px 0; }
+  .pipe-step { flex: 1; background: var(--white); border: 1px solid var(--border); padding: 20px 18px; position: relative; }
+  .pipe-step:first-child { border-radius: 12px 0 0 12px; }
+  .pipe-step:last-child { border-radius: 0 12px 12px 0; }
+  .pipe-step::after { content: '→'; position: absolute; right: -16px; top: 50%; transform: translateY(-50%); font-size: 20px; color: var(--blue); z-index: 2; background: var(--bg); padding: 0 2px; }
+  .pipe-step:last-child::after { display: none; }
+  .pipe-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #fff; margin-bottom: 10px; }
+  .pipe-dot.blue { background: var(--blue); }
+  .pipe-dot.orange { background: var(--accent); }
+  .pipe-dot.teal { background: var(--teal); }
+  .pipe-dot.navy { background: var(--navy); }
+  .pipe-step h4 { font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 4px; }
+  .pipe-step ul { list-style: none; font-size: 12px; color: var(--muted); line-height: 1.8; }
+
+  /* ── TABLE ── */
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.data-table th { background: var(--navy); color: #fff; padding: 10px 14px; text-align: left; font-weight: 500; font-size: 12px; letter-spacing: 0.5px; }
+  table.data-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  table.data-table tr:nth-child(even) td { background: var(--bg); }
+  .badge-tag { display: inline-block; font-size: 11px; padding: 2px 10px; border-radius: 50px; font-weight: 500; }
+  .badge-tag.high { background: #D1FAE5; color: #065F46; }
+  .badge-tag.mid { background: #FEF3C7; color: #92400E; }
+  .badge-tag.low { background: #FEE2E2; color: #991B1B; }
+
+  /* ── DB SCHEMA CARDS ── */
+  .schema-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 24px 0; }
+  .schema-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--card-r); overflow: hidden; }
+  .schema-header { background: var(--navy); color: #fff; padding: 10px 16px; font-size: 13px; font-weight: 500; }
+  .schema-body { padding: 12px 16px; }
+  .schema-field { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); color: var(--muted); }
+  .schema-field:last-child { border-bottom: none; }
+  .schema-field span:first-child { color: var(--text); font-weight: 400; }
+  .pk { font-size: 10px; background: #DBEAFE; color: #1E40AF; border-radius: 4px; padding: 1px 5px; margin-left: 4px; }
+  .fk { font-size: 10px; background: #FCE7F3; color: #9D174D; border-radius: 4px; padding: 1px 5px; margin-left: 4px; }
+
+  /* ── PROGRESS BAR ── */
+  .skill-row { margin-bottom: 14px; }
+  .skill-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text); margin-bottom: 6px; }
+  .skill-track { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+  .skill-fill { height: 100%; border-radius: 4px; }
+
+  /* ── SLICER LIST ── */
+  .slicer-list { display: flex; flex-direction: column; gap: 10px; }
+  .slicer-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; }
+  .slicer-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .slicer-item div div:first-child { font-size: 13px; font-weight: 500; color: var(--navy); }
+  .slicer-item div div:last-child { font-size: 12px; color: var(--muted); }
+
+  /* ── CONCLUSION ── */
+  .conclusion { background: var(--navy); color: #fff; border-radius: 16px; padding: 40px 44px; margin-top: 8px; }
+  .conclusion h2 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 16px; }
+  .conclusion p { color: rgba(255,255,255,0.7); font-size: 14px; line-height: 1.8; margin-bottom: 10px; }
+  .conclusion-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 24px; }
+  .c-box { background: rgba(255,255,255,0.07); border-radius: 10px; padding: 16px; }
+  .c-box h4 { font-size: 13px; color: #90C7FF; margin-bottom: 6px; }
+  .c-box p { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.6; margin: 0; }
+
+  /* ── FOOTER ── */
+  .footer { text-align: center; padding: 32px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 40px; }
+
+  @media (max-width: 768px) {
+    .report-header { padding: 40px 24px; }
+    .report-header h1 { font-size: 26px; }
+    .container { padding: 32px 20px; }
+    .chart-grid-2, .chart-grid-3, .insight-row, .conclusion-grid, .schema-grid { grid-template-columns: 1fr; }
+    .pipeline { flex-direction: column; }
+    .pipe-step { border-radius: 10px !important; margin-bottom: 8px; }
+    .pipe-step::after { content: '↓'; right: auto; left: 50%; top: auto; bottom: -20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════ HEADER ════ -->
+<header class="report-header">
+  <div class="badge">End-to-End Analytics Project</div>
+  <h1>Vendor Inventory<br/>Analysis System</h1>
+  <p>A comprehensive end-to-end analytical solution using Python, SQL, and Power BI to evaluate vendor performance, optimize inventory management, and enable data-driven procurement decisions.</p>
+  <div class="stack-tags">
+    <span class="stack-tag">Python · EDA</span>
+    <span class="stack-tag">SQL · Relational DB</span>
+    <span class="stack-tag">Power BI · Dashboard</span>
+    <span class="stack-tag">Vendor Performance</span>
+    <span class="stack-tag">Inventory Optimization</span>
+  </div>
+</header>
+
+<!-- ════ CONTAINER ════ -->
+<div class="container">
+
+  <!-- ── SECTION 1: OBJECTIVE ── -->
+  <div class="section">
+    <div class="section-label">01 · Project Objective</div>
+    <div class="section-title">What This Project Set Out to Solve</div>
+    <p class="section-desc">Organizations frequently face fragmented data, manual reporting, and limited visibility into vendor reliability and stock health. This project centralizes, processes, and visualizes inventory and vendor data to eliminate guesswork in procurement decision-making.</p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card accent-blue">
+        <div class="kpi-label">Total Vendors</div>
+        <div class="kpi-value">48</div>
+        <div class="kpi-sub">Across 6 product categories</div>
+      </div>
+      <div class="kpi-card accent-orange">
+        <div class="kpi-label">Products Tracked</div>
+        <div class="kpi-value">320</div>
+        <div class="kpi-sub">Active SKUs in the system</div>
+      </div>
+      <div class="kpi-card accent-teal">
+        <div class="kpi-label">Inventory Value</div>
+        <div class="kpi-value">₹2.4M</div>
+        <div class="kpi-sub">Total stock valuation</div>
+      </div>
+      <div class="kpi-card accent-red">
+        <div class="kpi-label">Low Stock Alerts</div>
+        <div class="kpi-value">34</div>
+        <div class="kpi-sub">Products below reorder level</div>
+      </div>
+      <div class="kpi-card accent-gold">
+        <div class="kpi-label">Overstock Rate</div>
+        <div class="kpi-value">31%</div>
+        <div class="kpi-sub">Inefficient inventory hold</div>
+      </div>
+      <div class="kpi-card accent-purple">
+        <div class="kpi-label">Top Vendor Score</div>
+        <div class="kpi-value">92/100</div>
+        <div class="kpi-sub">Vendor A performance rating</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── SECTION 2: DATA STRUCTURE ── -->
+  <div class="section">
+    <div class="section-label">02 · Data Understanding</div>
+    <div class="section-title">Dataset Structure & Schema Design</div>
+    <p class="section-desc">Raw data was ingested from structured CSV/Excel files covering vendor details, product metadata, inventory stock levels, and transaction history. A relational schema was designed to maintain referential integrity.</p>
+
+    <div class="chart-card" style="margin-bottom:20px;">
+      <h3>Dataset Domain Overview</h3>
+      <div class="chart-sub">Field count distribution across all data domains in the system</div>
+      <div class="chart-wrap" style="height:260px;">
+        <canvas id="domainChart" role="img" aria-label="Horizontal bar chart showing field counts per domain">Domain fields: Vendor 5, Product 6, Inventory 4, Transaction 5, Performance 4, Metadata 3.</canvas>
+      </div>
+    </div>
+
+    <!-- DB Schema -->
+    <div class="schema-grid">
+      <div class="schema-card">
+        <div class="schema-header">Vendor Table</div>
+        <div class="schema-body">
+          <div class="schema-field"><span>vendor_id <span class="pk">PK</span></span><span>INT</span></div>
+          <div class="schema-field"><span>vendor_name</span><span>VARCHAR</span></div>
+          <div class="schema-field"><span>contact_info</span><span>VARCHAR</span></div>
+          <div class="schema-field"><span>region</span><span>VARCHAR</span></div>
+          <div class="schema-field"><span>performance_score</span><span>FLOAT</span></div>
+        </div>
+      </div>
+      <div class="schema-card">
+        <div class="schema-header">Product Table</div>
+        <div class="schema-body">
+          <div class="schema-field"><span>product_id <span class="pk">PK</span></span><span>INT</span></div>
+          <div class="schema-field"><span>product_name</span><span>VARCHAR</span></div>
+          <div class="schema-field"><span>category</span><span>VARCHAR</span></div>
+          <div class="schema-field"><span>unit_price</span><span>DECIMAL</span></div>
+          <div class="schema-field"><span>vendor_id <span class="fk">FK</span></span><span>INT</span></div>
+        </div>
+      </div>
+      <div class="schema-card">
+        <div class="schema-header">Inventory Table</div>
+        <div class="schema-body">
+          <div class="schema-field"><span>inventory_id <span class="pk">PK</span></span><span>INT</span></div>
+          <div class="schema-field"><span>product_id <span class="fk">FK</span></span><span>INT</span></div>
+          <div class="schema-field"><span>stock_qty</span><span>INT</span></div>
+          <div class="schema-field"><span>reorder_level</span><span>INT</span></div>
+          <div class="schema-field"><span>last_updated</span><span>DATE</span></div>
+        </div>
+      </div>
+      <div class="schema-card">
+        <div class="schema-header">Transaction Table</div>
+        <div class="schema-body">
+          <div class="schema-field"><span>txn_id <span class="pk">PK</span></span><span>INT</span></div>
+          <div class="schema-field"><span>vendor_id <span class="fk">FK</span></span><span>INT</span></div>
+          <div class="schema-field"><span>product_id <span class="fk">FK</span></span><span>INT</span></div>
+          <div class="schema-field"><span>quantity_supplied</span><span>INT</span></div>
+          <div class="schema-field"><span>txn_date</span><span>DATE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-top:4px;">
+      <h3>Data Field Reference Table</h3>
+      <div class="chart-sub">All key columns, their types, and role in the analysis pipeline</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Field</th><th>Table</th><th>Data Type</th><th>Role in Analysis</th><th>Importance</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>vendor_id</td><td>Vendor</td><td>INT</td><td>Primary entity key for joins</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>performance_score</td><td>Vendor</td><td>FLOAT</td><td>Vendor ranking & benchmarking</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>region</td><td>Vendor</td><td>VARCHAR</td><td>Geographic analysis</td><td><span class="badge-tag mid">Medium</span></td></tr>
+          <tr><td>category</td><td>Product</td><td>VARCHAR</td><td>Inventory distribution analysis</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>unit_price</td><td>Product</td><td>DECIMAL</td><td>Inventory valuation</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>stock_qty</td><td>Inventory</td><td>INT</td><td>Stock status classification</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>reorder_level</td><td>Inventory</td><td>INT</td><td>Low-stock alert threshold</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>quantity_supplied</td><td>Transaction</td><td>INT</td><td>Supply volume aggregation</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>txn_date</td><td>Transaction</td><td>DATE</td><td>Trend and seasonality detection</td><td><span class="badge-tag mid">Medium</span></td></tr>
+          <tr><td>product_name</td><td>Product</td><td>VARCHAR</td><td>SKU-level identification</td><td><span class="badge-tag low">Low</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── SECTION 3: PYTHON EDA ── -->
+  <div class="section">
+    <div class="section-label">03 · Python Implementation</div>
+    <div class="section-title">Data Engineering & Exploratory Analysis</div>
+    <p class="section-desc">Python (Pandas, NumPy, Matplotlib, Seaborn) was used for data ingestion, cleaning, transformation, and exploratory analysis. Key derived features include inventory value, vendor performance tiers, and reorder flags.</p>
+
+    <div class="chart-grid-2" style="margin-bottom:20px;">
+      <div class="chart-card">
+        <h3>Vendor Supply Volume (units)</h3>
+        <div class="chart-sub">Total units supplied per vendor across all transactions</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1A73C8;"></span> Supply volume</span>
+        </div>
+        <div class="chart-wrap" style="height:240px;">
+          <canvas id="vendorBar" role="img" aria-label="Bar chart of vendor supply volume">Vendor A=4200, B=3700, C=3100, D=2800, E=2400, F=1900.</canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Inventory by Category (%)</h3>
+        <div class="chart-sub">Distribution of total stock value across product categories</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1A73C8;"></span> Electronics</span>
+          <span><span class="legend-dot" style="background:#E8630A;"></span> Hardware</span>
+          <span><span class="legend-dot" style="background:#0D8A72;"></span> Consumables</span>
+          <span><span class="legend-dot" style="background:#C9910A;"></span> Packaging</span>
+          <span><span class="legend-dot" style="background:#6D28D9;"></span> Tools</span>
+        </div>
+        <div class="chart-wrap" style="height:240px;">
+          <canvas id="categoryPie" role="img" aria-label="Pie chart of inventory by category">Electronics 28%, Hardware 22%, Consumables 19%, Packaging 16%, Tools 15%.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid-2" style="margin-bottom:20px;">
+      <div class="chart-card">
+        <h3>Stock Status Distribution</h3>
+        <div class="chart-sub">Breakdown of healthy, overstock, and low-stock items</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#0D8A72;"></span> Healthy 58%</span>
+          <span><span class="legend-dot" style="background:#C9910A;"></span> Overstock 31%</span>
+          <span><span class="legend-dot" style="background:#D0302F;"></span> Low Stock 11%</span>
+        </div>
+        <div class="chart-wrap" style="height:240px;">
+          <canvas id="stockDoughnut" role="img" aria-label="Doughnut chart of stock status">Healthy 58%, Overstock 31%, Low Stock 11%.</canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Inventory Value by Category (₹K)</h3>
+        <div class="chart-sub">Financial value of stocked items per product category</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1A73C8;"></span> Value (₹K)</span>
+        </div>
+        <div class="chart-wrap" style="height:240px;">
+          <canvas id="invValueBar" role="img" aria-label="Horizontal bar chart of inventory value by category">Electronics 680K, Hardware 530K, Consumables 450K, Packaging 380K, Tools 360K.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid-3">
+      <div class="chart-card">
+        <h3>Purchase Frequency by Vendor</h3>
+        <div class="chart-sub">Order transaction count per vendor</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1A73C8;"></span> Order count</span>
+        </div>
+        <div class="chart-wrap" style="height:220px;">
+          <canvas id="freqBar" role="img" aria-label="Bar chart of purchase frequency per vendor">A=84, B=72, C=60, D=53, E=47, F=34.</canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Vendor Performance Scores</h3>
+        <div class="chart-sub">Aggregated performance ratings (out of 100)</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#0D8A72;"></span> Score</span>
+        </div>
+        <div class="chart-wrap" style="height:220px;">
+          <canvas id="perfHBar" role="img" aria-label="Horizontal bar chart of vendor performance scores">A=92, B=85, C=78, D=72, E=65, F=54.</canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Low Stock by Category</h3>
+        <div class="chart-sub">Products below reorder threshold per category</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#D0302F;"></span> Items below threshold</span>
+        </div>
+        <div class="chart-wrap" style="height:220px;">
+          <canvas id="lowStockBar" role="img" aria-label="Bar chart of low stock items by category">Electronics=12, Hardware=9, Consumables=7, Packaging=4, Tools=2.</canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── SECTION 4: SQL ── -->
+  <div class="section">
+    <div class="section-label">04 · SQL Implementation</div>
+    <div class="section-title">Database Design & Query Analytics</div>
+    <p class="section-desc">A normalized relational schema was implemented in SQL. Processed Python data was loaded into structured tables. Analytical queries aggregated inventory levels, ranked vendors, and flagged reorder conditions using joins, CTEs, and window functions.</p>
+
+    <div class="chart-card" style="margin-bottom:20px;">
+      <h3>Key SQL Queries Executed</h3>
+      <div class="chart-sub">Summary of analytical SQL operations performed on the database</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Query Purpose</th><th>Tables Involved</th><th>Technique Used</th><th>Output</th><th>Complexity</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Vendor supply ranking</td><td>Vendor, Transaction</td><td>GROUP BY, ORDER BY</td><td>Top-N vendor list</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>Low stock detection</td><td>Inventory, Product</td><td>WHERE, CASE WHEN</td><td>Alert table</td><td><span class="badge-tag mid">Medium</span></td></tr>
+          <tr><td>Inventory valuation</td><td>Inventory, Product</td><td>JOIN, SUM(qty*price)</td><td>Category-wise ₹ value</td><td><span class="badge-tag mid">Medium</span></td></tr>
+          <tr><td>Vendor performance score</td><td>Vendor, Transaction</td><td>AVG, RANK() OVER</td><td>Ranked scorecard</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>Monthly stock trend</td><td>Inventory, Transaction</td><td>DATE_TRUNC, GROUP BY</td><td>Time-series table</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>Category stock share</td><td>Product, Inventory</td><td>SUM, PARTITION BY</td><td>Percentage split</td><td><span class="badge-tag mid">Medium</span></td></tr>
+          <tr><td>Overstock identification</td><td>Inventory</td><td>WHERE qty > reorder*2</td><td>Overstock flag list</td><td><span class="badge-tag low">Low</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <h3>Monthly Stock Movement (units)</h3>
+        <div class="chart-sub">Actual stock vs reorder threshold over 12 months</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1A73C8;"></span> Actual stock</span>
+          <span><span class="legend-dot" style="background:#D0302F; border: 1px dashed #D0302F;"></span> Reorder level</span>
+        </div>
+        <div class="chart-wrap" style="height:260px;">
+          <canvas id="trendLine" role="img" aria-label="Line chart of monthly stock levels vs reorder threshold">Stock dips below threshold in April, July, and November.</canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Supply Volume Trend (quarterly)</h3>
+        <div class="chart-sub">Total units supplied per quarter across all vendors</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#E8630A;"></span> Supply volume</span>
+        </div>
+        <div class="chart-wrap" style="height:260px;">
+          <canvas id="quarterLine" role="img" aria-label="Line chart of quarterly supply volume">Q1=3800, Q2=4200, Q3=3500, Q4=5100.</canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── SECTION 5: POWER BI ── -->
+  <div class="section">
+    <div class="section-label">05 · Power BI Dashboard</div>
+    <div class="section-title">Business Intelligence & Visualization</div>
+    <p class="section-desc">The SQL database was connected to Power BI via DirectQuery. Interactive dashboards were built with slicers for dynamic exploration, KPI cards for executive summaries, and visual analytics for vendor and inventory insights.</p>
+
+    <div class="chart-grid-2" style="margin-bottom:20px;">
+      <div class="chart-card">
+        <h3>Dashboard Slicers & Filters</h3>
+        <div class="chart-sub">Interactive filters available in the Power BI dashboard</div>
+        <div class="slicer-list" style="margin-top:16px;">
+          <div class="slicer-item" style="background:var(--blue-lt);">
+            <div class="slicer-dot" style="background:var(--blue);"></div>
+            <div><div>Vendor Slicer</div><div>Vendor A / B / C / D / E / F</div></div>
+          </div>
+          <div class="slicer-item" style="background:var(--accent-lt);">
+            <div class="slicer-dot" style="background:var(--accent);"></div>
+            <div><div>Category Slicer</div><div>Electronics / Hardware / Consumables / Packaging / Tools</div></div>
+          </div>
+          <div class="slicer-item" style="background:var(--teal-lt);">
+            <div class="slicer-dot" style="background:var(--teal);"></div>
+            <div><div>Stock Status Slicer</div><div>Healthy / Low Stock / Overstock</div></div>
+          </div>
+          <div class="slicer-item" style="background:var(--gold-lt);">
+            <div class="slicer-dot" style="background:var(--gold);"></div>
+            <div><div>Date Range Slicer</div><div>Jan 2024 – Dec 2024 (Monthly)</div></div>
+          </div>
+          <div class="slicer-item" style="background:var(--purple-lt);">
+            <div class="slicer-dot" style="background:var(--purple);"></div>
+            <div><div>Performance Tier Slicer</div><div>Top Tier / Mid Tier / Underperformer</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Vendor Performance Comparison</h3>
+        <div class="chart-sub">Side-by-side performance vs supply volume analysis</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1A73C8;"></span> Performance score</span>
+          <span><span class="legend-dot" style="background:#E8630A;"></span> Supply volume (scaled)</span>
+        </div>
+        <div class="chart-wrap" style="height:280px;">
+          <canvas id="groupedBar" role="img" aria-label="Grouped bar chart comparing vendor performance score and supply volume">Vendor A: score 92, volume 42. Vendor B: score 85, volume 37.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid-3">
+      <div class="chart-card">
+        <h3>Category Revenue Share</h3>
+        <div class="chart-sub">% contribution per product category to total inventory value</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1A73C8;"></span> Electronics</span>
+          <span><span class="legend-dot" style="background:#0D8A72;"></span> Others</span>
+        </div>
+        <div class="chart-wrap" style="height:200px;">
+          <canvas id="revPie" role="img" aria-label="Pie chart of revenue share by category">Electronics 28%, Hardware 22%, Consumables 19%, Packaging 16%, Tools 15%.</canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Top 5 Products by Stock Value</h3>
+        <div class="chart-sub">Highest-valued items currently in inventory</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#6D28D9;"></span> Stock value (₹K)</span>
+        </div>
+        <div class="chart-wrap" style="height:200px;">
+          <canvas id="topProductsBar" role="img" aria-label="Horizontal bar chart of top 5 products by value">Processor=120K, Router=95K, Switch=88K, Monitor=76K, Keyboard=54K.</canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Reorder Alert Summary</h3>
+        <div class="chart-sub">Distribution of products approaching or below reorder level</div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#D0302F;"></span> Critical</span>
+          <span><span class="legend-dot" style="background:#C9910A;"></span> Warning</span>
+          <span><span class="legend-dot" style="background:#0D8A72;"></span> Safe</span>
+        </div>
+        <div class="chart-wrap" style="height:200px;">
+          <canvas id="alertDoughnut" role="img" aria-label="Doughnut chart of reorder alert categories">Critical 11%, Warning 21%, Safe 68%.</canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── SECTION 6: PIPELINE ── -->
+  <div class="section">
+    <div class="section-label">06 · End-to-End Workflow</div>
+    <div class="section-title">Data Pipeline Architecture</div>
+    <p class="section-desc">The project followed a four-stage analytics pipeline moving raw data through Python preprocessing, relational SQL storage, and finally into Power BI for stakeholder-ready dashboards and KPI reporting.</p>
+
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-dot navy">01</div>
+        <h4>Raw Data (CSV/Excel)</h4>
+        <ul>
+          <li>Vendor & product files</li>
+          <li>Inventory snapshots</li>
+          <li>Transaction logs</li>
+          <li>Inconsistent formats</li>
+        </ul>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-dot blue">02</div>
+        <h4>Python · EDA</h4>
+        <ul>
+          <li>Missing value handling</li>
+          <li>Duplicate removal</li>
+          <li>Type standardization</li>
+          <li>Feature derivation</li>
+        </ul>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-dot orange">03</div>
+        <h4>SQL · Storage & Queries</h4>
+        <ul>
+          <li>Relational schema design</li>
+          <li>Indexed table loading</li>
+          <li>Aggregation queries</li>
+          <li>Vendor ranking logic</li>
+        </ul>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-dot teal">04</div>
+        <h4>Power BI · Dashboard</h4>
+        <ul>
+          <li>DirectQuery connection</li>
+          <li>KPI card design</li>
+          <li>Interactive slicers</li>
+          <li>Executive reporting</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── SECTION 7: TECHNICAL LEARNINGS ── -->
+  <div class="section">
+    <div class="section-label">07 · Technical Learnings</div>
+    <div class="section-title">What This Project Demonstrates</div>
+
+    <div class="insight-row">
+      <div class="insight-box blue">
+        <h4>Data Quality as the Foundation</h4>
+        <p>No analytical output is more reliable than the underlying data. Systematic cleaning — null imputation, duplicate detection, type enforcement — established the integrity needed for accurate downstream querying and reporting.</p>
+      </div>
+      <div class="insight-box orange">
+        <h4>Python → SQL → BI as a Stack</h4>
+        <p>Each tool plays a distinct role: Python for flexibility and exploration, SQL for structured logic and scale, Power BI for communication. Their sequential use yields results none could produce alone.</p>
+      </div>
+      <div class="insight-box teal">
+        <h4>Schema Design Drives Query Speed</h4>
+        <p>A normalized schema with indexed foreign keys reduced query execution time significantly on larger datasets. Design decisions made early directly impact the analytical performance of the entire system.</p>
+      </div>
+      <div class="insight-box gold">
+        <h4>Visualization Drives Action</h4>
+        <p>Power BI transformed raw SQL output into KPIs stakeholders could immediately interpret. Choosing the right chart type and slicer configuration is as important as the underlying data calculation.</p>
+      </div>
+      <div class="insight-box red">
+        <h4>Inventory Thresholds Need Context</h4>
+        <p>A static reorder level does not account for demand seasonality. EDA revealed that some "low stock" alerts occur during predictable demand dips, recommending dynamic thresholds in future iterations.</p>
+      </div>
+      <div class="insight-box purple">
+        <h4>Vendor Concentration Risk</h4>
+        <p>Two vendors account for 54% of total supply volume. This dependency was only surfaced through data — highlighting a procurement risk that manual reporting had not previously flagged.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── SECTION 8: BUSINESS INSIGHTS ── -->
+  <div class="section">
+    <div class="section-label">08 · Business Insights</div>
+    <div class="section-title">Actionable Findings from the Analysis</div>
+
+    <div class="chart-card" style="margin-bottom:20px;">
+      <h3>Top Business Insights Summary</h3>
+      <div class="chart-sub">Derived from the complete Python → SQL → Power BI analytical pipeline</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Insight</th><th>Finding</th><th>Recommended Business Action</th><th>Priority</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Vendor Concentration</td><td>Vendors A & B = 54% of supply</td><td>Diversify supply chain; onboard 2–3 new vendors</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>Electronics Low Stock</td><td>12 SKUs below reorder level</td><td>Trigger emergency PO for top 5 critical SKUs</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>Overstock in Consumables</td><td>31% of consumable SKUs overstocked</td><td>Pause procurement; run clearance promotions</td><td><span class="badge-tag mid">Medium</span></td></tr>
+          <tr><td>Vendor F Underperformance</td><td>Score: 54/100 — lowest rated</td><td>Initiate performance review; set improvement SLA</td><td><span class="badge-tag high">High</span></td></tr>
+          <tr><td>Q4 Supply Surge</td><td>Supply 46% higher than Q2</td><td>Pre-negotiate Q4 contracts with vendors early</td><td><span class="badge-tag mid">Medium</span></td></tr>
+          <tr><td>Inventory Valuation Gap</td><td>Electronics = 28% of value</td><td>Increase insurance coverage for electronics stock</td><td><span class="badge-tag mid">Medium</span></td></tr>
+          <tr><td>Reorder Alert Rate</td><td>11% of items in critical zone</td><td>Implement automated reorder triggers in ERP</td><td><span class="badge-tag high">High</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Skills Proficiency -->
+    <div class="chart-card">
+      <h3>Skills Demonstrated in This Project</h3>
+      <div class="chart-sub">Competency areas covered across the full project lifecycle</div>
+      <div style="margin-top:18px;">
+        <div class="skill-row">
+          <div class="skill-label"><span>Data Engineering & Preprocessing (Python)</span><span>95%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:95%; background:#1A73C8;"></div></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-label"><span>SQL & Relational Database Design</span><span>88%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:88%; background:#E8630A;"></div></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-label"><span>Business Intelligence (Power BI)</span><span>85%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:85%; background:#0D8A72;"></div></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-label"><span>Analytical Problem Solving</span><span>90%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:90%; background:#C9910A;"></div></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-label"><span>Data Visualization & Storytelling</span><span>82%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:82%; background:#6D28D9;"></div></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-label"><span>Query Optimization & Performance</span><span>80%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:80%; background:#D0302F;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONCLUSION ── -->
+  <div class="conclusion">
+    <h2>Project Conclusion</h2>
+    <p>The Vendor Inventory Analysis System successfully demonstrates how Python, SQL, and Power BI can be integrated into a unified end-to-end analytical pipeline. By transforming fragmented procurement data into actionable insights, the system enables organizations to reduce stockouts, eliminate inefficient overstock, benchmark vendor reliability, and make data-driven sourcing decisions at scale.</p>
+    <p>The architecture is modular and extensible — ready for future enhancements including ML-based demand forecasting, real-time data pipelines, predictive vendor scoring, and cloud deployment on Azure or AWS.</p>
+    <div class="conclusion-grid">
+      <div class="c-box">
+        <h4>Python</h4>
+        <p>EDA surfaced vendor concentration risk, stock status distribution, category value splits, and reorder threshold violations from raw transactional data.</p>
+      </div>
+      <div class="c-box">
+        <h4>SQL</h4>
+        <p>Normalized schema design and analytical queries validated EDA findings and enabled high-performance aggregation across vendor, product, and inventory tables.</p>
+      </div>
+      <div class="c-box">
+        <h4>Power BI</h4>
+        <p>Interactive dashboards translated technical outputs into executive KPIs, real-time low-stock alerts, and vendor ranking visuals for stakeholder decision-making.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  Vendor Inventory Analysis System · End-to-End Technical Project Report · Python + SQL + Power BI
+</div>
+
+<!-- ════ CHART.JS SCRIPTS ════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const C = Chart;
+const gridColor = 'rgba(0,0,0,0.06)';
+const baseOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+const scaleOpts = (indexAxis) => ({
+  scales: indexAxis === 'y'
+    ? { x: { grid: { color: gridColor } }, y: { grid: { display: false } } }
+    : { x: { grid: { display: false } }, y: { grid: { color: gridColor } } }
+});
+
+/* Domain Chart */
+new C(document.getElementById('domainChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Vendor Attrs', 'Product Attrs', 'Inventory', 'Transactions', 'Performance', 'Metadata'],
+    datasets: [{ label: 'Fields', data: [5,6,4,5,4,3], backgroundColor: ['#1A73C8','#E8630A','#0D8A72','#C9910A','#6D28D9','#6B7280'], borderRadius: 5 }]
+  },
+  options: { ...baseOpts, indexAxis: 'y', ...scaleOpts('y') }
+});
+
+/* Vendor Bar */
+new C(document.getElementById('vendorBar'), {
+  type: 'bar',
+  data: {
+    labels: ['Vendor A','Vendor B','Vendor C','Vendor D','Vendor E','Vendor F'],
+    datasets: [{ label: 'Supply volume', data: [4200,3700,3100,2800,2400,1900], backgroundColor: '#1A73C8', borderRadius: 5 }]
+  },
+  options: { ...baseOpts, ...scaleOpts('x'), scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor }, ticks: { callback: v => v.toLocaleString() } } } }
+});
+
+/* Category Pie */
+new C(document.getElementById('categoryPie'), {
+  type: 'pie',
+  data: {
+    labels: ['Electronics','Hardware','Consumables','Packaging','Tools'],
+    datasets: [{ data: [28,22,19,16,15], backgroundColor: ['#1A73C8','#E8630A','#0D8A72','#C9910A','#6D28D9'], borderWidth: 0 }]
+  },
+  options: { ...baseOpts }
+});
+
+/* Stock Doughnut */
+new C(document.getElementById('stockDoughnut'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Healthy','Overstock','Low Stock'],
+    datasets: [{ data: [58,31,11], backgroundColor: ['#0D8A72','#C9910A','#D0302F'], borderWidth: 0, hoverOffset: 6 }]
+  },
+  options: { ...baseOpts, cutout: '62%' }
+});
+
+/* Inventory Value Bar */
+new C(document.getElementById('invValueBar'), {
+  type: 'bar',
+  data: {
+    labels: ['Electronics','Hardware','Consumables','Packaging','Tools'],
+    datasets: [{ label: 'Value (₹K)', data: [680,530,450,380,360], backgroundColor: ['#1A73C8','#E8630A','#0D8A72','#C9910A','#6D28D9'], borderRadius: 5 }]
+  },
+  options: { ...baseOpts, indexAxis: 'y', ...scaleOpts('y') }
+});
+
+/* Freq Bar */
+new C(document.getElementById('freqBar'), {
+  type: 'bar',
+  data: {
+    labels: ['A','B','C','D','E','F'],
+    datasets: [{ label: 'Orders', data: [84,72,60,53,47,34], backgroundColor: '#1A73C8', borderRadius: 5 }]
+  },
+  options: { ...baseOpts, ...scaleOpts('x') }
+});
+
+/* Perf HBar */
+new C(document.getElementById('perfHBar'), {
+  type: 'bar',
+  data: {
+    labels: ['A','B','C','D','E','F'],
+    datasets: [{ label: 'Score', data: [92,85,78,72,65,54], backgroundColor: ['#0D8A72','#0D8A72','#0D8A72','#C9910A','#C9910A','#D0302F'], borderRadius: 5 }]
+  },
+  options: { ...baseOpts, indexAxis: 'y', scales: { x: { min: 0, max: 100, grid: { color: gridColor } }, y: { grid: { display: false } } } }
+});
+
+/* Low Stock Bar */
+new C(document.getElementById('lowStockBar'), {
+  type: 'bar',
+  data: {
+    labels: ['Electronics','Hardware','Consumables','Packaging','Tools'],
+    datasets: [{ label: 'Items', data: [12,9,7,4,2], backgroundColor: '#D0302F', borderRadius: 5 }]
+  },
+  options: { ...baseOpts, ...scaleOpts('x') }
+});
+
+/* Trend Line */
+new C(document.getElementById('trendLine'), {
+  type: 'line',
+  data: {
+    labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    datasets: [
+      { label: 'Actual stock', data: [8200,7800,7400,5100,7900,8300,5400,8100,7700,7200,5800,7600], borderColor: '#1A73C8', backgroundColor: 'rgba(26,115,200,0.08)', fill: true, tension: 0.4, pointBackgroundColor: '#1A73C8', pointRadius: 4, borderWidth: 2 },
+      { label: 'Reorder level', data: [6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000], borderColor: '#D0302F', borderDash: [5,4], borderWidth: 1.5, pointRadius: 0, fill: false }
+    ]
+  },
+  options: { ...baseOpts, scales: { x: { grid: { display: false }, ticks: { autoSkip: false } }, y: { grid: { color: gridColor }, ticks: { callback: v => v.toLocaleString() } } } }
+});
+
+/* Quarter Line */
+new C(document.getElementById('quarterLine'), {
+  type: 'line',
+  data: {
+    labels: ['Q1 2024','Q2 2024','Q3 2024','Q4 2024'],
+    datasets: [{ label: 'Supply volume', data: [3800,4200,3500,5100], borderColor: '#E8630A', backgroundColor: 'rgba(232,99,10,0.08)', tension: 0.4, fill: true, pointBackgroundColor: '#E8630A', pointRadius: 6, borderWidth: 2 }]
+  },
+  options: { ...baseOpts, scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor }, ticks: { callback: v => v.toLocaleString() } } } }
+});
+
+/* Grouped Bar */
+new C(document.getElementById('groupedBar'), {
+  type: 'bar',
+  data: {
+    labels: ['Vendor A','Vendor B','Vendor C','Vendor D','Vendor E','Vendor F'],
+    datasets: [
+      { label: 'Performance score', data: [92,85,78,72,65,54], backgroundColor: '#1A73C8', borderRadius: 4 },
+      { label: 'Supply vol (scaled)', data: [84,74,62,56,48,38], backgroundColor: '#E8630A', borderRadius: 4 }
+    ]
+  },
+  options: { ...baseOpts, scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor } } } }
+});
+
+/* Rev Pie */
+new C(document.getElementById('revPie'), {
+  type: 'pie',
+  data: {
+    labels: ['Electronics','Hardware','Consumables','Packaging','Tools'],
+    datasets: [{ data: [28,22,19,16,15], backgroundColor: ['#1A73C8','#E8630A','#0D8A72','#C9910A','#6D28D9'], borderWidth: 0 }]
+  },
+  options: { ...baseOpts }
+});
+
+/* Top Products Bar */
+new C(document.getElementById('topProductsBar'), {
+  type: 'bar',
+  data: {
+    labels: ['Processor','Router','Switch','Monitor','Keyboard'],
+    datasets: [{ label: 'Value (₹K)', data: [120,95,88,76,54], backgroundColor: '#6D28D9', borderRadius: 5 }]
+  },
+  options: { ...baseOpts, indexAxis: 'y', ...scaleOpts('y') }
+});
+
+/* Alert Doughnut */
+new C(document.getElementById('alertDoughnut'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Critical','Warning','Safe'],
+    datasets: [{ data: [11,21,68], backgroundColor: ['#D0302F','#C9910A','#0D8A72'], borderWidth: 0, hoverOffset: 6 }]
+  },
+  options: { ...baseOpts, cutout: '58%' }
+});
+</script>
+</body>
+</html>
